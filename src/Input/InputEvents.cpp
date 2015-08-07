@@ -154,9 +154,9 @@ void InputEvents::findNextActiveLabel(int direction)
         MenuItem &item = overlay_menu != NULL && (*overlay_menu)[active_label].IsDefined()
             ? (*overlay_menu).SetMenuItem(active_label)
             : (*menu).SetMenuItem(active_label);
-        if (item.event) {
+        if (item.event && item.visible) {
           item.down = true;
-            break;
+          break;
         }
     }
     drawButtons(getModeID(), true);
@@ -260,8 +260,8 @@ InputEvents::drawButtons(Mode mode, bool full)
   if (!global_running)
     return;
 
-  const Menu &menu = input_config.menus[mode];
-  const Menu *const overlay_menu = overlay_mode != MODE_DEFAULT
+  Menu &menu = input_config.menus[mode];
+  Menu *const overlay_menu = overlay_mode != MODE_DEFAULT
     ? &input_config.menus[overlay_mode]
     : NULL;
 
