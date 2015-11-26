@@ -64,7 +64,9 @@ public:
     quit = true;
   }
 
+  void Push(Event *event);
   void Push(EventLoop::Callback callback, void *ctx);
+  void PushKeyPress(unsigned key_code);
 
 private:
   bool Generate(Event &event);

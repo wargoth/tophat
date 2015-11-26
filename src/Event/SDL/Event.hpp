@@ -48,6 +48,19 @@ enum {
 struct Event {
   SDL_Event event;
 
+  Event() = default;
+  Event(int type, unsigned key_code) {
+    event.key.type = type;
+    event.key.state = SDL_PRESSED;
+    event.key.keysym.sym = (SDLKey)key_code;
+    event.key.keysym.mod = KMOD_NONE;
+    if (key_code < 0x100) { /* SDLK_DOWN, ... */
+      event.key.keysym.unicode = 0;
+    } else { /* SDLK_a, ... */
+      event.key.keysym.unicode = key_code;
+    }
+  }
+
   bool IsKeyDown() const {
     return event.type == SDL_KEYDOWN;
   }

@@ -62,6 +62,20 @@ EventQueue::Generate(Event &event)
   return false;
 }
 
+void
+EventQueue::Push(Event *event)
+{
+  ::SDL_PushEvent(&event->event);
+}
+
+void
+EventQueue::PushKeyPress(unsigned key_code)
+{
+  Event *ev = new Event(SDL_KEYDOWN, key_code);
+  Push(ev);
+  delete ev;
+}
+
 bool
 EventQueue::Pop(Event &event)
 {
