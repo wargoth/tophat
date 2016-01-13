@@ -55,7 +55,7 @@ endif
 ifeq ($(TARGET_IS_KOBO),y)
 
 .PHONY: kobo-libs
-kobo-libs: alsa-lib
+kobo-libs: alsa-lib julius
 	./kobo/build.py $(TARGET_OUTPUT_DIR) $(HOST_ARCH) $(CC) $(CXX) $(AR) $(STRIP)
 
 KOBO_POWER_OFF_SOURCES = \
@@ -187,4 +187,5 @@ alsa-lib:
 	patch -p1 <../../kobo/alsa-lib-1.0.18-relink.patch; \
 	make -j all; \
 	cd ../..
+
 endif

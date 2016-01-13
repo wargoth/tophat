@@ -51,3 +51,6 @@
 [submodule "lib/alsa-lib"]
 	path = lib/alsa-lib
 	url = git://git.alsa-project.org/alsa-lib.git
+[submodule "src/Audio/VoiceRecognition/julius/julius"]
+	path = src/Audio/VoiceRecognition/julius/julius
+	url = https://github.com/julius-speech/julius.git

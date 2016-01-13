@@ -748,6 +748,9 @@ ifneq ($(TARGET),ANDROID)
   TARGET_LDLIBS += -lpthread
   ifeq ($(TARGET_IS_LINUX),y)
     TARGET_LDLIBS += -lrt # for clock_gettime()
+    JULIUS_LIB = $(SRC)/Audio/VoiceRecognition/julius/julius/libjulius/libjulius.a \
+      $(SRC)/Audio/VoiceRecognition/julius/julius/libsent/libsent.a
+    TARGET_LDLIBS += $(JULIUS_LIB)
     ifeq ($(TARGET_IS_KOBO),y)
       TARGET_LDLIBS += $(topdir)/lib/alsa-lib/src/.libs/libasound.a
     else ifeq ($(TARGET),UNIX)

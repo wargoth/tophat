@@ -839,3 +839,17 @@ $(eval $(call link-shared-library,$(PROGRAM_NAME),XCSOAR))
 else
 $(eval $(call link-program,$(PROGRAM_NAME),XCSOAR))
 endif
+
+$(TARGET_OUTPUT_DIR)/src/IO/VoiceRecognition/VoiceRecognition.o: julius
+
+julius:
+	cd $(SRC)/Audio/VoiceRecognition/julius/julius; \
+	git checkout -f v4.3.1; \
+	sed -i -e"/^SUBDIRS=/s/julius mkbingram mkbinhmm adinrec adintool mkgshmm mkss jcontrol gramtools generate-ngram jclient-perl man//" Makefile.in; \
+	sed -i -e"/^CONFIG_SUBDIRS=/s/mkgshmm gramtools jcontrol julius//" Makefile.in; \
+	for dir in libsent libjulius; do \
+		sed -i -e"s/TARGET/_TARGET_/g" "$${dir}"/Makefile.in; \
+	done; \
+	[ $(TARGET_IS_KOBO) = y ] && export CC=arm-linux-gnueabihf-gcc; \
+	./configure --prefix=/opt/tophat; \
+	make -j8 all;

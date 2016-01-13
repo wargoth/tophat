@@ -179,6 +179,8 @@ include $(topdir)/build/install.mk
 ######## compiler flags
 
 INCLUDES += -I$(SRC) -I$(ENGINE_SRC_DIR)
+INCLUDES += -I$(SRC)/Audio/VoiceRecognition/julius/julius/libjulius/include
+INCLUDES += -I$(SRC)/Audio/VoiceRecognition/julius/julius/libsent/include
 
 ####### sources
 
