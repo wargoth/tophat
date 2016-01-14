@@ -46,6 +46,8 @@ Copyright_License {
 #include "Simulator.hpp"
 #include "OS/Args.hpp"
 #include "IO/Async/GlobalIOThread.hpp"
+#include "Audio/VoiceRecognition/VoiceRecognition.hpp"
+#include "Event/Globals.hpp"
 
 #ifndef NDEBUG
 #include "Thread/Thread.hpp"
@@ -148,6 +150,8 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   InitLanguage();
 
   InitialiseIOThread();
+  VoiceRecognition *rec = new VoiceRecognition(*event_queue);
+  rec->Start();
 
   // Perform application initialization and run loop
   int ret = EXIT_FAILURE;
@@ -155,6 +159,8 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     ret = CommonInterface::main_window->RunEventLoop();
 
   Shutdown();
+
+  delete rec;
 
   DeinitialiseIOThread();
 
