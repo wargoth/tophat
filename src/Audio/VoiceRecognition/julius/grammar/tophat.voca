@@ -1,0 +1,85 @@
+% NS_B
+<s>        sil
+
+% NS_E
+</s>        sil
+
+% PREFIX
+tophat     t aa p
+STEVE	   s t iy v 
+YOUNG      y ah ng
+BOB        b aa b
+JOHNSTON   jh aa n s t ah n
+JOHN       jh aa n
+JORDAN     jh ao r d ah n
+JOE        jh ow
+
+% COMMAND
+0          z iy r ow
+1          w ah n
+2          t uw
+3          th r iy
+4          f ao r
+5          f ay v
+6          s ih k s
+7          s eh v ah n
+8          ey t
+9          n ay n
+# from default.xci mode=default
+FINISH     f ih n ih sh
+next       n eh k s t
+ESCAPE     ih s k ey p
+DOWN       d aw n
+Quick      k w ih k
+Analysis   ae n ae l ih s ih s
+Checklist  ch eh k l ih s t
+Traffic    t r ae f ih k
+Setup      s eh t ah p
+Menu       m eh n y uw
+Navigation n ae v ah g ey sh ah n
+Display    d ih s p l ey
+Configure  k ah n f ih g y er
+Info       ih n f ow
+minus      m ay n ah s
+Previous   p r iy v iy ah s
+Circling   s er k ah l ih ng
+Rotate     r ow t ey t
+Target     t aa r g ah t
+# extra, found in default.xci.
+Point      p oy n t
+On         aa n
+Thermal    th er m ah l
+Device     d ih v ay s
+System     s ih s t ah m
+Basic      b ey s ih k
+Terrain    t er ey n
+Topography t ah p aa g r ah f iy
+Pan        p ae n
+Adjust     ah jh ah s t
+Northup    n ao r th ah p
+Orientation ao r iy eh n t ey sh ah n
+Exit       eh g z ih t
+FINAL      f ay n ah l
+#Stop       s t aa p
+#
+#Task       t ae s k
+START       s t aa r t # difficult to recognize
+#RETURN     r ih t er n # difficult to recognize
+#UP         ah p # difficult to recognize
+#RIGHT      r ay t # difficult to recognize
+#LEFT       l eh f t # difficult to recognize
+#OFF        ao f # difficult to recognize
+#Nav        n ae v # difficult to recognize
+#In         ih n # difficult to recognize
+#Out        aw t # difficult to recognize
+#plus       p l ah s # difficult to recognize
+#back       b ae k # difficult to recognize
+#Calculator k ae l k y ah l ey t er # difficult to recognize
+#Mode       m ow d # difficult to recognize
+#Status     s t ae t ah s # difficult to recognize
+#Turn       t er n # difficult to recognize
+#Zoom       z uw m # difficult to recognize
+#Weather    w eh dh er # difficult to recognize
+#Logger     l aa g er # difficult to recognize
+#Wind       w ay n d # difficult to recognize
+#Trail      t r ey l # difficult to recognize

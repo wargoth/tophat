@@ -167,6 +167,18 @@ $(TARGET_OUTPUT_DIR)/KoboRoot.tgz: $(XCSOAR_BIN) \
 	rm -rf ${PWD}/$(@D)/KoboRoot/mnt/onboard/XCSoarData/alsa-lib/share/aclocal; \
 	rm -rf ${PWD}/$(@D)/KoboRoot/mnt/onboard/XCSoarData/alsa-lib/include; \
 	cd ../..
+	$(Q)install -m 0755 -d $(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/acoustic_model_files
+	$(Q)install -m 0755 -d $(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/grammar
+	$(Q)install -m 0644 $(SRC)/Audio/VoiceRecognition/julius/tophat.jconf \
+		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius
+	$(Q)install -m 0644 $(SRC)/Audio/VoiceRecognition/julius/grammar/tophat.dfa \
+		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/grammar
+	$(Q)install -m 0644 $(SRC)/Audio/VoiceRecognition/julius/grammar/tophat.dict \
+		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/grammar
+	$(Q)install -m 0644 $(SRC)/Audio/VoiceRecognition/julius/grammar/tophat.term \
+		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/grammar
+	$(Q)install -m 0644 $(SRC)/Audio/VoiceRecognition/julius/acoustic_model_files/* \
+		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/acoustic_model_files
 	$(Q)fakeroot tar czfC $@ $(@D)/KoboRoot .
 
 alsa-lib:

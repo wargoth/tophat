@@ -844,7 +844,7 @@ endif
 
 $(TARGET_OUTPUT_DIR)/src/IO/VoiceRecognition/VoiceRecognition.o: julius
 
-julius:
+julius: julius_config
 	cd $(SRC)/Audio/VoiceRecognition/julius/julius; \
 	git checkout -f v4.3.1; \
 	sed -i -e"/^SUBDIRS=/s/julius mkbingram mkbinhmm adinrec adintool mkgshmm mkss jcontrol gramtools generate-ngram jclient-perl man//" Makefile.in; \
@@ -855,3 +855,12 @@ julius:
 	[ $(TARGET_IS_KOBO) = y ] && export CC=arm-linux-gnueabihf-gcc; \
 	./configure --prefix=/opt/tophat; \
 	make -j8 all;
+
+julius_config:
+ifeq ($(TARGET_IS_KOBO),y)
+	cd $(SRC)/Audio/VoiceRecognition/julius/grammar; mkdfa tophat
+else ifeq ($(TARGET),UNIX)
+	cd $(SRC)/Audio/VoiceRecognition/julius/grammar; mkdfa.pl tophat
+	rm -rf ${HOME}/.xcsoar/julius
+	cp -r $(SRC)/Audio/VoiceRecognition/julius ${HOME}/.xcsoar
+endif
