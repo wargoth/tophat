@@ -108,6 +108,14 @@ ProtectedTaskManager::IncrementActiveTaskPointArm(int offset)
   }
 }
 
+void
+ProtectedTaskManager::FinalTaskPoint()
+{
+  ExclusiveLease lease(*this);
+  unsigned size = lease->TaskSize();
+  lease->SetActiveTaskPoint(size - 1);
+}
+
 bool 
 ProtectedTaskManager::DoGoto(const Waypoint &wp)
 {

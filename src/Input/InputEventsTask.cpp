@@ -196,6 +196,10 @@ InputEvents::eventAdjustWaypoint(const TCHAR *misc)
     protected_task_manager->IncrementActiveTaskPointArm(1); // arm sensitive next
   else if (StringIsEqual(misc, _T("previousarm")))
     protected_task_manager->IncrementActiveTaskPointArm(-1); // arm sensitive previous
+  else if (StringIsEqual(misc, _T("start")))
+    protected_task_manager->Reset(); // Start - task start
+  else if (StringIsEqual(misc, _T("finish")))
+    protected_task_manager->FinalTaskPoint(); // final glide/finish
 
   {
     /* quickly propagate the updated values from the TaskManager to

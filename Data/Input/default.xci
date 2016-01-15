@@ -327,6 +327,26 @@ type=key
 data=9
 event=Setup Target
 
+mode=default
+type=key
+data=P
+event=AdjustWaypoint previous
+
+mode=default
+type=key
+data=N
+event=AdjustWaypoint next
+
+mode=default
+type=key
+data=S
+event=AdjustWaypoint start
+
+mode=default
+type=key
+data=F
+event=AdjustWaypoint finish
+
 #mode=default
 #type=key
 #data=0

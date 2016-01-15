@@ -73,6 +73,7 @@ public:
 
   void IncrementActiveTaskPoint(int offset);
   void IncrementActiveTaskPointArm(int offset);
+  void FinalTaskPoint();
 
   bool DoGoto(const Waypoint &wp);
 
