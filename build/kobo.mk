@@ -149,6 +149,7 @@ $(TARGET_OUTPUT_DIR)/KoboRoot.tgz: $(XCSOAR_BIN) \
 	$(Q)$(UIMAGE_CMD)
 	$(Q)install -m 0644 $(TARGET_OUTPUT_DIR)/force_uimage $(@D)/KoboRoot/mnt/onboard/.kobo/force_uimage
 	$(Q)install -m 0755 $(KOBO_SYS_LIB_PATHS) $(@D)/KoboRoot/opt/tophat/lib
+	$(Q)install -m 0755 -d $(@D)/KoboRoot/mnt/onboard/XCSoarData/sound
 	$(Q)install -m 0644 $(topdir)/kobo/inittab $(@D)/KoboRoot/etc
 	$(Q)install -m 0644 $(topdir)/kobo/inetd.conf $(@D)/KoboRoot/etc
 	$(Q)install -m 0755 -d $(@D)/KoboRoot/etc/init.d
@@ -179,6 +180,7 @@ $(TARGET_OUTPUT_DIR)/KoboRoot.tgz: $(XCSOAR_BIN) \
 		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/grammar
 	$(Q)install -m 0644 $(SRC)/Audio/VoiceRecognition/julius/acoustic_model_files/* \
 		$(@D)/KoboRoot/mnt/onboard/XCSoarData/julius/acoustic_model_files
+	$(Q)install -m 0644 Data/sound/*.raw $(@D)/KoboRoot/mnt/onboard/XCSoarData/sound
 	$(Q)fakeroot tar czfC $@ $(@D)/KoboRoot .
 
 alsa-lib:

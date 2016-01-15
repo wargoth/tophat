@@ -170,7 +170,11 @@ AirspaceWarningMonitor::Check()
 
     // un-blank the display, play a sound
     ResetUserIdle();
+#if defined(ANDROID) || (defined(WIN32) && !defined(GNAV))
     PlayResource(_T("IDR_WAV_BEEPBWEEP"));
+#else
+    PlayResource(_T("Airspace"));
+#endif
 
     // show airspace warnings dialog
     if (CommonInterface::GetUISettings().enable_airspace_warning_dialog)
@@ -213,5 +217,9 @@ AirspaceWarningMonitor::Check()
 
   // un-blank the display, play a sound
   ResetUserIdle();
+#if defined(ANDROID) || (defined(WIN32) && !defined(GNAV))
   PlayResource(_T("IDR_WAV_BEEPBWEEP"));
+#else
+  PlayResource(_T("Airspace"));
+#endif
 }

@@ -2,6 +2,10 @@ key=DEFAULT
 sound=IDR_WAV_DRIP
 delay=1500
 
+key=Takeoff
+sound=Takeoff
+delay=1500
+
 key=Pan mode ON
 sound=IDR_INSERT
 delay=1500
@@ -105,7 +109,7 @@ delay=60000
 
 key=Battery low
 delay=5000
-sound=IDR_FAIL
+sound=Battery_low
 
 key=Screen Mode Full
 delay=1000
