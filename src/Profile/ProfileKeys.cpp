@@ -213,6 +213,7 @@ const char AutoLogger[] = "AutoLogger";
 const char DisableAutoLogger[] = "DisableAutoLogger";
 const char EnableFlightLogger[] = "EnableFlightLogger";
 const char EnableNMEALogger[] = "EnableNMEALogger";
+const char RepeatVoice[] = "RepeatVoice";
 const char MapFile[] = "MapFile"; // pL
 const char BallastSecsToEmpty[] = "BallastSecsToEmpty";
 const char StartupTipDeclineVersion[] = "StartupTipDeclineVersion";

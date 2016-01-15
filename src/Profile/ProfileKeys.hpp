@@ -208,6 +208,7 @@ extern const char AutoLogger[];
 extern const char DisableAutoLogger[];
 extern const char EnableFlightLogger[];
 extern const char EnableNMEALogger[];
+extern const char RepeatVoice[];
 extern const char MapFile[];
 extern const char BallastSecsToEmpty[];
 extern const char ShowWaypointListWarning[];

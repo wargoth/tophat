@@ -8,6 +8,8 @@
 #include <windef.h> // for MAX_PATH
 #include <string.h>
 #include "Screen/Key.h"
+#include "Interface.hpp"
+#include "Audio/raw_play.hpp"
 
 #ifdef KOBO
 #define TOPHAT_CONFIDENCE 0.5
@@ -19,6 +21,9 @@
 #define COMMAND_CONFIDENCE 0.5
 
 #define KEYWORD_KEYCODE_SIZE 503 /* the prime number bigger than SDLK_LAST */
+
+#define SKIP_PRELUDE 6000
+#define NOISE_LEVEL 300
 
 double tophat_confidence = TOPHAT_CONFIDENCE;
 double command_confidence = COMMAND_CONFIDENCE;
@@ -103,10 +108,51 @@ PushWords(const char *word)
   static_queue->PushKeyPress(KeywordSearch(word));
 }
 
+/* pass from record_speechlen() to monitor_repeat()  */
+static int speechlen = 0;
+
 /** 
  * Callback to output final recognition result.
  * This function will be called just after recognition of an input ends
  * 
+ */
+static void
+record_speechlen(Recog *recog, void *dummy)
+{
+  ADIn *adin = recog->adin;
+  if (!adin)
+    return;
+  if (adin->speechlen > speechlen)
+    speechlen = adin->speechlen;
+}
+
+static void
+monitor_repeat(Recog *recog)
+{
+  ADIn *adin = recog->adin;
+  if (!adin)
+    return;
+  SP16 *speech = adin->speech;
+  if (!speech)
+    return;
+  if (speechlen <= 0)
+    return;
+
+  /* skip slient portion to make shorter playing time */
+  for (int skip = 0; abs(*speech) < NOISE_LEVEL; speech++, speechlen--)
+    if (++skip > SKIP_PRELUDE)
+      break;
+  RawPlayback *raw_playback = new RawPlayback();
+  raw_playback->playback_mem(speech, speechlen);
+  delete raw_playback;
+
+  speechlen = 0; /* clear for next voice */
+}
+
+/**
+ * Callback to output final recognition result.
+ * This function will be called just after recognition of an input ends
+ *
  */
 static void
 output_result(Recog *recog, void *dummy)
@@ -142,22 +188,25 @@ output_result(Recog *recog, void *dummy)
       seq = s->word;
       seqnum = s->word_num;
 
+      const VoiceRecogSettings &voice =
+	CommonInterface::GetComputerSettings().voice_recog;
+      if (voice.repeat_voice)
+	monitor_repeat(recog); /* repeat */
       /* output word sequence like Julius */
       for (i = 1; i < seqnum - 1; i++)
 	printf("%s ", winfo->woutput[seq[i]]);
       for (i = 1; i < seqnum - 1; i++)
 	printf("%5.3f ",  s->confidence[i]);
+      printf("\n");
+      /* flush output buffer */
+      fflush(stdout);
       if (s->confidence[1] > tophat_confidence && /* first word */
 	  strcmp(winfo->woutput[seq[1]], "tophat") == 0 &&
 	  s->confidence[2] > command_confidence) { /* second word */
 	PushWords(winfo->woutput[seq[2]]);
       }
-      printf("\n");
     }
   }
-
-  /* flush output buffer */
-  fflush(stdout);
 }
 
 VoiceRecognition::VoiceRecognition(EventQueue &_queue):
@@ -252,6 +301,7 @@ VoiceRecognition::Run()
   /* Register callback */
   /*********************/
   /* register result callback functions */
+  callback_add(recog, CALLBACK_ADIN_TRIGGERED, record_speechlen, NULL);
   callback_add(recog, CALLBACK_RESULT, output_result, NULL);
 
   /**************************/

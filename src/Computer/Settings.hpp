@@ -39,6 +39,7 @@ Copyright_License {
 #include "Plane/Plane.hpp"
 #include "Wind/Settings.hpp"
 #include "Audio/VegaVoiceSettings.hpp"
+#include "Audio/VoiceRecogSettings.hpp"
 #include "WaveSettings.hpp"
 
 #include <type_traits>
@@ -230,6 +231,8 @@ struct ComputerSettings {
 #ifdef HAVE_TRACKING
   TrackingSettings tracking;
 #endif
+
+  VoiceRecogSettings voice_recog;
 
   void SetDefaults();
 };
