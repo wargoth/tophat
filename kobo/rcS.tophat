@@ -185,8 +185,13 @@ cd /drivers/ntx508/sound
 /sbin/insmod usb/snd-usbmidi-lib.ko
 /sbin/insmod usb/snd-usb-audio.ko
 
-if [ -f $ONBOARD/XCSoarData/kobo/start_nickel \
-    -o ! -x /opt/tophat/bin/KoboMenu ]; then
+# load network driver
+cd /drivers/ntx508/net
+/sbin/insmod mii.ko
+/sbin/insmod usb/usbnet.ko
+/sbin/insmod usb/asix.ko
+
+if [ -f $ONBOARD/XCSoarData/kobo/start_nickel ]; then
     rm -f $ONBOARD/XCSoarData/kobo/start_nickel
     /usr/local/Kobo/hindenburg &
 

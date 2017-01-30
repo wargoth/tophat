@@ -132,6 +132,7 @@ FORCE_UIMAGE:
 $(UIMAGE_BASE_DIR)/drivers/usb-host.tar.gz $(UIMAGE_BASE_DIR)/sound.tar.gz: $(UIMAGE_USB)
 	make -C $(UIMAGE_BASE_DIR) CROSS_COMPILE=arm-none-linux-gnueabi- ARCH=arm modules
 	cd $(UIMAGE_BASE_DIR)/drivers/usb; tar czf ../usb-host.tar.gz `find . -name "*.ko"`
+	cd $(UIMAGE_BASE_DIR)/drivers/net; tar czf ../net.tar.gz `find . -name "*.ko"`
 	cd $(UIMAGE_BASE_DIR)/sound; tar czf ../sound.tar.gz `find . -name "*.ko"`
 
 $(UIMAGE_BASE_DIR)/drivers/usb-device.tar.gz: $(UIMAGE_BASE_DIR)/drivers/usb-host.tar.gz
@@ -198,6 +199,9 @@ $(TARGET_OUTPUT_DIR)/KoboRoot.tgz: $(XCSOAR_BIN) \
 	$(Q)install -d 0755 $(@D)/KoboRoot/drivers/ntx508/usb-device
 	PWD=`pwd`; cd $(@D)/KoboRoot/drivers/ntx508/usb-device;\
 		tar xzf ${PWD}/$(UIMAGE_BASE_DIR)/drivers/usb-device.tar.gz
+	$(Q)install -d 0755 $(@D)/KoboRoot/drivers/ntx508/net
+	PWD=`pwd`; cd $(@D)/KoboRoot/drivers/ntx508/net;\
+		tar xzf ${PWD}/$(UIMAGE_BASE_DIR)/drivers/net.tar.gz
 	$(Q)install -m 0755 $(KOBO_SYS_LIB_PATHS) $(@D)/KoboRoot/opt/tophat/lib
 	$(Q)install -m 0755 -d $(@D)/KoboRoot/opt/tophat/share/sounds
 	$(Q)install -m 0644 $(topdir)/kobo/inittab $(@D)/KoboRoot/etc
