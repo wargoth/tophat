@@ -26,10 +26,10 @@
 #include "NMEA/Derived.hpp"
 #include "NMEA/MoreData.hpp"
 #include "LogFile.hpp"
-//#include <fstream>
-//#include <sstream>
-//#include <string>
-//#include <regex>
+#include "Net/HTTP/Session.hpp"
+#include "Net/HTTP/ToBuffer.hpp"
+#include "Net/HTTP/Request.hpp"
+#include "Util/StaticString.hxx"
 
 #include <fstream>
 #include <iostream>
@@ -38,7 +38,7 @@
 #include "Units/System.hpp"
 
 
-unsigned bool
+bool
 WindForecast::ReadLine(const std::string& line, Data *data)
 {
   int num(0);
@@ -69,9 +69,60 @@ WindForecast::Init()
 {
   data.clear();
 
-  // https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=36.908027,%20-121.313979&start=latest&format=csv
+  /*
 
-  std::ifstream strm("./src/Computer/Wind/s1.txt");
+  NarrowString<1024> url;
+  url.Format("http://%s/client.php?op=login&user=%s&pass=%s",
+             GetServer(), (const char *)username2, (const char *)password);
+
+  // Open download session
+  Net::Session session;
+  if (session.Error())
+    return 0;
+
+  // Request the file
+  char buffer[1024];
+  Net::Request request(session, url, 3000);
+  if (!request.Send(10000))
+    return false;
+
+  ssize_t size = request.Read(buffer, sizeof(buffer), 10000);
+  if (size <= 0)
+    return 0;
+
+  buffer[size] = 0;
+
+  char *p_end;
+  UserID user_id = strtoul(buffer, &p_end, 10);
+  if (buffer == p_end)
+    return 0;
+   */
+
+  // Build file url
+  char url[256] = "https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=36.908027,-121.313979&start=latest";
+//  NarrowString<1024> url;
+//  url.Format("https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=%f,%f&start=latest",
+//             ba);
+
+  // Open download session
+  Net::Session session;
+  if (session.Error())
+    return;
+
+  char buffer[1024*10];
+   Net::Request request(session, url, 3000);
+   if (!request.Send(10000))
+     return ;
+
+  std::cout<<"OK";
+
+  ssize_t size = request.Read(buffer, sizeof(buffer), 10000);
+    if (size <= 0)
+      return;
+
+    buffer[size] = 0;
+
+  std::stringstream strm(buffer);
   std::string line;
   while (getline(strm, line)) {
     WindForecast::Data row;
