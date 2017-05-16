@@ -37,7 +37,6 @@
 #include <string>
 #include "Units/System.hpp"
 
-
 bool
 WindForecast::ReadLine(const std::string& line, Data *data)
 {
@@ -65,92 +64,83 @@ WindForecast::ReadLine(const std::string& line, Data *data)
 }
 
 void
-WindForecast::Init()
+WindForecast::Tick()
 {
-  data.clear();
-
-  /*
-
-  NarrowString<1024> url;
-  url.Format("http://%s/client.php?op=login&user=%s&pass=%s",
-             GetServer(), (const char *)username2, (const char *)password);
-
-  // Open download session
-  Net::Session session;
-  if (session.Error())
-    return 0;
-
-  // Request the file
-  char buffer[1024];
-  Net::Request request(session, url, 3000);
-  if (!request.Send(10000))
-    return false;
-
-  ssize_t size = request.Read(buffer, sizeof(buffer), 10000);
-  if (size <= 0)
-    return 0;
-
-  buffer[size] = 0;
-
-  char *p_end;
-  UserID user_id = strtoul(buffer, &p_end, 10);
-  if (buffer == p_end)
-    return 0;
-   */
+  mutex.Unlock();
 
   // Build file url
-  char url[256] = "https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=36.908027,-121.313979&start=latest";
-//  NarrowString<1024> url;
-//  url.Format("https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=%f,%f&start=latest",
-//             ba);
+  NarrowString<1024> url;
+  url.Format("https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=%f,%f&start=latest",
+             last_position.latitude.Degrees(), last_position.longitude.Degrees());
 
-  // Open download session
+  std::cout << "Calling " <<  url << std::endl;
+
+// Open download session
   Net::Session session;
   if (session.Error())
     return;
 
-  char buffer[1024*10];
-   Net::Request request(session, url, 3000);
-   if (!request.Send(10000))
-     return ;
-
-  std::cout<<"OK";
+  char buffer[1024 * 10];
+  Net::Request request(session, url, 3000);
+  if (!request.Send(10000))
+    return;
 
   ssize_t size = request.Read(buffer, sizeof(buffer), 10000);
-    if (size <= 0)
-      return;
+  if (size <= 0)
+    return;
 
-    buffer[size] = 0;
+  buffer[size] = 0;
 
   std::stringstream strm(buffer);
   std::string line;
   while (getline(strm, line)) {
     WindForecast::Data row;
-    if(WindForecast::ReadLine(line, &row)) {
-      std::cout << "out = " << (row.alt * 3.3) << " " << row.wdir << " " << row.wspd << std::endl;
+    if (WindForecast::ReadLine(line, &row)) {
+      std::cout << "out = " << (row.alt * 3.3) << " " << row.wdir << " "
+          << row.wspd << std::endl;
 
       data.push_back(row);
     }
   }
 
+  mutex.Lock();
+}
 
+void
+WindForecast::Init()
+{
+  data.clear();
 }
 
 WindForecast::Result
 WindForecast::Update(const MoreData &basic, const DerivedInfo &derived)
 {
-  if (!basic.NavAltitudeAvailable()) {
+  if (!basic.NavAltitudeAvailable() || !basic.location_available) {
     return WindForecast::Result(0);
   }
 
-  WindForecast::Result result = WindForecast::Result(5);
-  result.wind = SpeedVector(Angle::Degrees(fixed(90)), fixed(10));
+  ScopeLock protect(mutex);
+
+  if (IsBusy())
+    /* still running, skip this submission */
+    return WindForecast::Result(0);
+
+  last_position = basic.location;
+
+  if (data.empty()) {
+    Trigger();
+    return WindForecast::Result(0);
+  }
+
+  WindForecast::Result result = WindForecast::Result(0);
 
   Data *previous = NULL;
   for (unsigned int i = 0; i < data.size(); i++) {
     Data *row = &data[i];
     if (Units::ToSysUnit(row->alt, Unit::METER) > basic.nav_altitude) {
-      result.wind = WindForecast::LinearApprox(basic.nav_altitude, *previous, *row);
+      result.wind = WindForecast::LinearApprox(basic.nav_altitude, *previous,
+                                               *row);
+      result.quality = 1;
       break;
     } else {
       previous = row;
@@ -161,36 +151,9 @@ WindForecast::Update(const MoreData &basic, const DerivedInfo &derived)
 }
 
 SpeedVector
-WindForecast::LinearApprox(fixed altitude, WindForecast::Data &prev, WindForecast::Data &next)
+WindForecast::LinearApprox(fixed altitude, WindForecast::Data &prev,
+                           WindForecast::Data &next)
 {
-  return SpeedVector(Angle::Degrees(next.wdir), Units::ToSysUnit(next.wspd, Unit::KNOTS)) ;
+  return SpeedVector(Angle::Degrees(next.wdir),
+                     Units::ToSysUnit(next.wspd, Unit::KNOTS));
 }
-
-/*
-"""
-https://rucsoundings.noaa.gov/raob_format.html
-"""
-
-import re
-
-decimal = r'(-?\d+)'
-space = r'\s+'
-rec = re.compile(r'^' + (space + decimal) * 7)
-
-with open('s1.txt', 'r') as f:
-    print('ft', 'mb', 't/td', 'wdir/wspd')
-    for line in f:
-        match = rec.search(line)
-        if not match:
-            continue
-        groups = match.groups()
-        if int(groups[0]) not in range(4, 10):
-            continue
-        n, pres, height, temp, dewpt, wdir, wspd = map(float, groups)
-
-        if 99999 in [height, wdir, wspd]:
-            continue
-        pres, temp, dewpt = map(lambda x: x / 10, [pres, temp, dewpt])
-        print('%d\t%d\t%d/%d\t%d/%d' % (height * 3.28, pres, temp, dewpt, wdir, wspd))
-
-*/

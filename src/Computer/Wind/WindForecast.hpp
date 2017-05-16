@@ -24,14 +24,17 @@ Copyright_License {
 #ifndef XCSOAR_WIND_FORECAST_HPP
 #define XCSOAR_WIND_FORECAST_HPP
 
+#include "Net/HTTP/DownloadManager.hpp"
+#include "Thread/StandbyThread.hpp"
 #include "Geo/SpeedVector.hpp"
+#include "Geo/GeoPoint.hpp"
 #include <string>
 #include <vector>
 
 struct MoreData;
 struct DerivedInfo;
 
-class WindForecast {
+class WindForecast : protected StandbyThread {
 
   struct Data {
     float pres;
@@ -43,6 +46,7 @@ class WindForecast {
   };
 
   std::vector<Data> data;
+  GeoPoint last_position;
 
   SpeedVector LinearApprox(fixed altitude, Data &prev, Data &next);
   bool ReadLine(const std::string& line, Data *data);
@@ -61,8 +65,14 @@ public:
       }
     };
 
+  WindForecast():StandbyThread("WindForecast") {};
+
   void Init();
-  Result Update(const MoreData &basic, const DerivedInfo &derived);
+  Result
+  Update(const MoreData &basic, const DerivedInfo &derived);
+
+protected:
+  void Tick() override;
 };
 
 #endif
