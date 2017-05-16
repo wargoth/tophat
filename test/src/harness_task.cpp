@@ -168,6 +168,7 @@ task_report(const TaskManager &task_manager, const char *text)
         break;
 
       case TaskType::GOTO:
+      case TaskType::TEAMMATE:
         printf("# task is goto\n");
         break;
       }

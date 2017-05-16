@@ -399,6 +399,7 @@ PrintHelper::taskmanager_print(const TaskManager &task,
     break;
 
   case TaskType::GOTO:
+  case TaskType::TEAMMATE:
     gototask_print(*(const GotoTask *)task.GetActiveTask(), state);
     break;
 

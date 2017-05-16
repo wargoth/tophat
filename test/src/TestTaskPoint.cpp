@@ -39,6 +39,11 @@ public:
   virtual fixed GetElevation() const {
     return fixed(0);
   }
+
+  virtual fixed GetRequiredElevation(fixed safety_limit) const {
+    return fixed(0);
+  }
+
 };
 
 class TaskPointTest
