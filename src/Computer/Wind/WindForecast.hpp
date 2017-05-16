@@ -45,7 +45,7 @@ class WindForecast {
   std::vector<Data> data;
 
   SpeedVector LinearApprox(fixed altitude, Data &prev, Data &next);
-  unsigned int ReadLine(const std::string& line, Data *data);
+  unsigned bool ReadLine(const std::string& line, Data *data);
 
 public:
   struct Result

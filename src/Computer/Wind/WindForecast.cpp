@@ -38,19 +38,19 @@
 #include "Units/System.hpp"
 
 
-unsigned int
+unsigned bool
 WindForecast::ReadLine(const std::string& line, Data *data)
 {
   int num(0);
   std::istringstream strm(line);
   if (!(strm >> num)) {
-    return 0;
+    return false;
   }
   if (4 <= num && num <= 9) {
     int pres, alt, temp, dewpt, wdir, wspd;
     strm >> pres >> alt >> temp >> dewpt >> wdir >> wspd;
     if (alt == 99999 || wdir == 99999 || wspd == 99999) {
-      return 0;
+      return false;
     }
     data->pres = pres / 10.0;
     data->alt = alt;
@@ -58,9 +58,9 @@ WindForecast::ReadLine(const std::string& line, Data *data)
     data->dewpt = dewpt / 10.0;
     data->wspd = wspd;
     data->wdir = wdir;
-    return 1;
+    return true;
   } else {
-    return 0;
+    return false;
   }
 }
 
