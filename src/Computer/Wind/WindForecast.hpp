@@ -28,6 +28,7 @@ Copyright_License {
 #include "Thread/StandbyThread.hpp"
 #include "Geo/SpeedVector.hpp"
 #include "Geo/GeoPoint.hpp"
+#include "Time/BrokenDateTime.hpp"
 #include <string>
 #include <vector>
 
@@ -46,30 +47,37 @@ class WindForecast : protected StandbyThread {
   };
 
   std::vector<Data> data;
+  bool first_run = true;
   GeoPoint last_position;
+  BrokenDateTime last_time;
+  GeoPoint last_update_position;
+  BrokenDateTime last_update_time;
 
-  SpeedVector LinearApprox(fixed altitude, Data &prev, Data &next);
-  bool ReadLine(const std::string& line, Data *data);
+  SpeedVector LinearApprox(fixed altitude, const Data *prev, const Data *next);
+  bool ReadLine(const std::string& line, Data &data);
+  bool NeedUpdate();
+
 
 public:
   struct Result
-    {
-      SpeedVector wind;
-      int quality;
+  {
+    unsigned quality;
+    SpeedVector wind;
 
-      Result() {}
-      Result(int _quality):quality(_quality) {}
+    Result() {}
+    Result(unsigned _quality):quality(_quality) {}
+    Result(unsigned _quality, SpeedVector _wind)
+      :quality(_quality), wind(_wind) {}
 
-      bool IsValid() const {
-        return quality > 0;
-      }
-    };
+    bool IsValid() const {
+      return quality > 0;
+    }
+  };
 
   WindForecast():StandbyThread("WindForecast") {};
 
   void Init();
-  Result
-  Update(const MoreData &basic, const DerivedInfo &derived);
+  Result Update(const MoreData &basic, const DerivedInfo &derived);
 
 protected:
   void Tick() override;

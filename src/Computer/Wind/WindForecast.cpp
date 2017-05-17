@@ -37,26 +37,39 @@
 #include <string>
 #include "Units/System.hpp"
 
+#define WIND_FC_QUALITY 5
+// how far should data be updated
+#define WIND_FC_UPDATE_DISTANCE_NM 5
+// how often should data be updated
+#define WIND_FC_UPDATE_INTERVAL_MIN 60
+// how long should it wait before retrying on fail
+#define WIND_FC_RETRY_MIN 1
+
+/**
+ * Parses a single line of the sounding
+ */
 bool
-WindForecast::ReadLine(const std::string& line, Data *data)
+WindForecast::ReadLine(const std::string& line, Data &data)
 {
   int num(0);
   std::istringstream strm(line);
   if (!(strm >> num)) {
     return false;
   }
+  // we're interested only in lines starting from numbers between 4 and 9
   if (4 <= num && num <= 9) {
     int pres, alt, temp, dewpt, wdir, wspd;
     strm >> pres >> alt >> temp >> dewpt >> wdir >> wspd;
     if (alt == 99999 || wdir == 99999 || wspd == 99999) {
+      // no data
       return false;
     }
-    data->pres = pres / 10.0;
-    data->alt = alt;
-    data->temp = temp / 10.0;
-    data->dewpt = dewpt / 10.0;
-    data->wspd = wspd;
-    data->wdir = wdir;
+    data.pres = pres / 10.0;
+    data.alt = alt;
+    data.temp = temp / 10.0;
+    data.dewpt = dewpt / 10.0;
+    data.wspd = wspd;
+    data.wdir = wdir;
     return true;
   } else {
     return false;
@@ -68,18 +81,24 @@ WindForecast::Tick()
 {
   mutex.Unlock();
 
+  last_update_position = last_position;
+  last_update_time = last_time;
+  first_run = false;
+
   // Build file url
   NarrowString<1024> url;
-  url.Format("https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=%f,%f&start=latest",
-             last_position.latitude.Degrees(), last_position.longitude.Degrees());
+  url.Format(
+      "https://rucsoundings.noaa.gov/get_soundings.cgi?data_source=Op40&airport=%f,%f&start=latest",
+      last_position.latitude.Degrees(), last_position.longitude.Degrees());
 
-  std::cout << "Calling " <<  url << std::endl;
+  LogDebug(_T("Updating winds aloft forecast from %s"), url.c_str());
 
-// Open download session
+  // Open download session
   Net::Session session;
   if (session.Error())
     return;
 
+  // 10kb should be enough
   char buffer[1024 * 10];
   Net::Request request(session, url, 3000);
   if (!request.Send(10000))
@@ -91,14 +110,12 @@ WindForecast::Tick()
 
   buffer[size] = 0;
 
+  // Format description: https://rucsoundings.noaa.gov/raob_format.html
   std::stringstream strm(buffer);
   std::string line;
   while (getline(strm, line)) {
     WindForecast::Data row;
-    if (WindForecast::ReadLine(line, &row)) {
-      std::cout << "out = " << (row.alt * 3.3) << " " << row.wdir << " "
-          << row.wspd << std::endl;
-
+    if (WindForecast::ReadLine(line, row)) {
       data.push_back(row);
     }
   }
@@ -110,6 +127,7 @@ void
 WindForecast::Init()
 {
   data.clear();
+  first_run = true;
 }
 
 WindForecast::Result
@@ -126,34 +144,67 @@ WindForecast::Update(const MoreData &basic, const DerivedInfo &derived)
     return WindForecast::Result(0);
 
   last_position = basic.location;
+  last_time = basic.date_time_utc;
 
-  if (data.empty()) {
+  if (NeedUpdate()) {
     Trigger();
     return WindForecast::Result(0);
   }
 
-  WindForecast::Result result = WindForecast::Result(0);
+  WindForecast::Result result(0);
 
   Data *previous = NULL;
   for (unsigned int i = 0; i < data.size(); i++) {
+    // data is sorted from lowest to highest altitudes
     Data *row = &data[i];
     if (Units::ToSysUnit(row->alt, Unit::METER) > basic.nav_altitude) {
-      result.wind = WindForecast::LinearApprox(basic.nav_altitude, *previous,
-                                               *row);
-      result.quality = 1;
-      break;
+      // pick first altitude which is higher than current
+      SpeedVector wind = WindForecast::LinearApprox(basic.nav_altitude,
+                                                    previous, row);
+      return WindForecast::Result(WIND_FC_QUALITY, wind);
     } else {
       previous = row;
     }
   }
 
-  return result;
+  return WindForecast::Result(0);
 }
 
-SpeedVector
-WindForecast::LinearApprox(fixed altitude, WindForecast::Data &prev,
-                           WindForecast::Data &next)
+/**
+ * Determines if update is needed
+ */
+bool
+WindForecast::NeedUpdate()
 {
-  return SpeedVector(Angle::Degrees(next.wdir),
-                     Units::ToSysUnit(next.wspd, Unit::KNOTS));
+  if (first_run)
+    return true;
+  if (data.empty() && (last_time - last_update_time) / 60 > WIND_FC_RETRY_MIN)
+    return true;
+  if (last_position.Distance(last_update_position)
+      > Units::ToSysUnit(WIND_FC_UPDATE_DISTANCE_NM, Unit::NAUTICAL_MILES))
+    return true;
+  if ((last_time - last_update_time) / 60 > WIND_FC_UPDATE_INTERVAL_MIN)
+    return true;
+  return false;
+}
+
+/**
+ * Approximates wind between two altitudes
+ */
+SpeedVector
+WindForecast::LinearApprox(fixed altitude, const WindForecast::Data *prev,
+                           const WindForecast::Data *next)
+{
+  assert(next != NULL);
+
+  if (prev == NULL) {
+    return SpeedVector(Angle::Degrees(next->wdir),
+                       Units::ToSysUnit(next->wspd, Unit::KNOTS));
+  }
+  // 0.0 <= factor < 1.0
+  float factor = (altitude - prev->alt) / (float)(next->alt - prev->alt);
+  float speed = prev->wspd + (next->wspd - prev->wspd) * factor;
+  return SpeedVector(
+      Angle::Degrees(prev->wdir).Fraction(Angle::Degrees(next->wdir), factor),
+      Units::ToSysUnit(speed, Unit::KNOTS));
 }
