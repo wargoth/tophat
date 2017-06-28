@@ -57,6 +57,10 @@ WindComputer::Compute(const WindSettings &settings,
     return;
   }
 
+  WindForecast::Result fc_result = wind_fc.Update(basic, calculated);
+  if (fc_result.IsValid())
+    wind_store.SlotMeasurement(basic, fc_result.wind, fc_result.quality);
+
   if (!calculated.flight.flying)
     return;
 
@@ -65,11 +69,6 @@ WindComputer::Compute(const WindSettings &settings,
     CirclingWind::Result result = circling_wind.NewSample(basic, calculated);
     if (result.IsValid())
       wind_store.SlotMeasurement(basic, result.wind, result.quality);
-
-    WindForecast::Result fc_result = wind_fc.Update(basic, calculated);
-    if (fc_result.IsValid())
-      wind_store.SlotMeasurement(basic, fc_result.wind, fc_result.quality);
-
 
     if (basic.airspeed_available && basic.airspeed_real) {
       if (basic.true_airspeed > GetVTakeoffFallback(glide_polar)) {

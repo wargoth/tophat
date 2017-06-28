@@ -35,6 +35,10 @@ Copyright_License {
 struct MoreData;
 struct DerivedInfo;
 
+
+/**
+ * Wind source based on winds aloft forecast.
+ */
 class WindForecast : protected StandbyThread {
 
   struct Data {

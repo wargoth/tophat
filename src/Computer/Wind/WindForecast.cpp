@@ -37,7 +37,7 @@
 #include <string>
 #include "Units/System.hpp"
 
-#define WIND_FC_QUALITY 5
+#define WIND_FC_QUALITY 1
 // how far should data be updated
 #define WIND_FC_UPDATE_DISTANCE_NM 5
 // how often should data be updated
