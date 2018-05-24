@@ -38,10 +38,10 @@ class FlarmId {
 
   uint32_t value;
 
+public:
   constexpr
   FlarmId(uint32_t _value):value(_value) {}
 
-public:
   FlarmId() = default;
 
   constexpr
