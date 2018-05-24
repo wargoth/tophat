@@ -185,6 +185,18 @@ struct FlarmTraffic {
     return valid;
   }
 
+  /**
+   * Clear this object if its data has expired.
+   *
+   * @param Time the current time stamp in seconds
+   * @param max_age the maximum age in seconds
+   * @return true if the object is still valid
+   */
+  bool Refresh(fixed Time, fixed max_age) {
+    valid.Expire(Time, max_age);
+    return valid;
+  }
+
   static const TCHAR* GetTypeString(AircraftType type);
 
   void Update(const FlarmTraffic &other);

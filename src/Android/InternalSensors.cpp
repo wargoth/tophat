@@ -32,6 +32,7 @@ Copyright_License {
 #include "OS/Clock.hpp"
 #include "Geo/Geoid.hpp"
 #include "Compiler.h"
+#include "Util/StaticString.hxx"
 
 Java::TrivialClass InternalSensors::gps_cls, InternalSensors::sensors_cls;
 jmethodID InternalSensors::gps_ctor_id, InternalSensors::close_method;
@@ -274,6 +275,65 @@ Java_org_tophat_InternalGPS_setLocation(JNIEnv *env, jobject obj,
 }
 
 // Implementations of the various C++ functions called by NonGPSSensors.java.
+
+gcc_visibility_default
+JNIEXPORT void JNICALL
+Java_org_tophat_NonGPSSensors_setGliderLinkInfo(
+    JNIEnv* env, jobject obj, jlong gid, jstring callsign,
+    jdouble latitude, jdouble longitude, jdouble altitude,
+    jdouble gspeed, jdouble vspeed, jint bearing) {
+  unsigned index = getDeviceIndex(env, obj);
+
+  ScopeLock protect(device_blackboard->mutex);
+  NMEAInfo &basic = device_blackboard->SetRealState(index);
+  basic.UpdateClock();
+  basic.alive.Update(basic.clock);
+
+  const char *nativeString = env->GetStringUTFChars(callsign, JNI_FALSE);
+
+  FlarmId id = FlarmId((uint32_t)gid);
+
+  StaticString<10> name;
+  name.SetASCII(nativeString);
+
+  env->ReleaseStringUTFChars(callsign, nativeString);
+
+  TrafficList *trafficList = &(basic.glink_data.traffic);
+
+  FlarmTraffic *traffic = trafficList->FindTraffic(id);
+  if (traffic == nullptr) {
+    traffic = trafficList->AllocateTraffic();
+    if (traffic == nullptr)
+      // no more slots available
+      return;
+
+    traffic->Clear();
+    traffic->id = id;
+
+    trafficList->new_traffic.Update(basic.clock);
+  }
+
+  traffic->name = name;
+  traffic->alarm_level = FlarmTraffic::AlarmType::NONE;
+
+  traffic->location_available = true;
+  traffic->location = GeoPoint(Angle::Degrees(longitude),
+                              Angle::Degrees(latitude));
+
+  traffic->altitude_available = true;
+  traffic->altitude = fixed(altitude);
+  traffic->speed_received = fixed(gspeed) >= fixed(0.1);
+  traffic->speed = fixed(gspeed);
+  traffic->climb_rate_received = true;
+  traffic->climb_rate = fixed(vspeed);
+  traffic->track = Angle::Degrees(bearing);
+  traffic->type = FlarmTraffic::AircraftType::GLIDER;
+
+  // set time of fix to current time
+  traffic->valid.Update(basic.clock);
+
+  device_blackboard->ScheduleMerge();
+}
 
 gcc_visibility_default
 JNIEXPORT void JNICALL

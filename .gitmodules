@@ -1,6 +1,6 @@
 [submodule "android/ioio"]
 	path = android/ioio
-	url = git://git.xcsoar.org/xcsoar/master/ioio.git
+	url = https://github.com/XCSoar/ioio.git
 [submodule "kobo/uimage"]
 	path = kobo/uimage
 	url = https://github.com/ifly7charlie/XCSoar-Kobo-Build

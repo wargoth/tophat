@@ -63,6 +63,21 @@ struct TrafficList {
       *this = add;
   }
 
+  /**
+   * Replaces data in the list
+   */
+  void Replace(const TrafficList &add) {
+    *this = add;
+  }
+
+  void Expire(fixed clock, fixed new_traffic_max_age, fixed traffic_max_age) {
+    new_traffic.Expire(clock, new_traffic_max_age);
+
+    for (unsigned i = list.size(); i-- > 0;)
+      if (!list[i].Refresh(clock, traffic_max_age))
+        list.quick_remove(i);
+  }
+
   void Expire(fixed clock) {
     new_traffic.Expire(clock, fixed(60));
 
