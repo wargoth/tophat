@@ -320,12 +320,13 @@ Java_org_tophat_NonGPSSensors_setGliderLinkInfo(
   traffic->location = GeoPoint(Angle::Degrees(longitude),
                               Angle::Degrees(latitude));
 
-  traffic->altitude_available = true;
+  traffic->altitude_available = fixed(altitude) > fixed(-10000);
   traffic->altitude = fixed(altitude);
   traffic->speed_received = fixed(gspeed) >= fixed(0.1);
   traffic->speed = fixed(gspeed);
-  traffic->climb_rate_received = true;
+  traffic->climb_rate_received = fixed(vspeed) > fixed(-8675309);
   traffic->climb_rate = fixed(vspeed);
+  traffic->track_received = fixed(bearing) < fixed(361);
   traffic->track = Angle::Degrees(bearing);
   traffic->type = FlarmTraffic::AircraftType::GLIDER;
 

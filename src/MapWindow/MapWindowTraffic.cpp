@@ -176,7 +176,7 @@ MapWindow::DrawGLinkTraffic(Canvas &canvas,
       TextInBox(canvas, traffic.name, sc_name.x, sc_name.y,
                 mode, GetClientRect());
 
-    if (traffic.climb_rate >= fixed(0.1) || traffic.climb_rate <= fixed(-0.1)) {
+    if (traffic.climb_rate_received) {
       // If average climb data available draw it to the canvas
       TCHAR label_avg[100];
       FormatUserVerticalSpeed(traffic.climb_rate,
