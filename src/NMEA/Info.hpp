@@ -35,10 +35,10 @@ Copyright_License {
 #include "Atmosphere/Pressure.hpp"
 #include "DeviceInfo.hpp"
 #include "FLARM/Data.hpp"
-#include "GliderLinkData.hpp"
 #include "Geo/SpeedVector.hpp"
 
 #include <type_traits>
+#include "../GliderLink/GliderLinkData.hpp"
 
 /**
  * A struct that holds all the parsed data read from the connected devices

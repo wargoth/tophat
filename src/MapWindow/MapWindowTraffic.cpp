@@ -128,7 +128,7 @@ MapWindow::DrawGLinkTraffic(Canvas &canvas,
   if (!GetMapSettings().show_flarm_on_map)
     return;
 
-  const TrafficList &traffic = Basic().glink_data.traffic;
+  const GliderLinkTrafficList &traffic = Basic().glink_data.traffic;
   if (traffic.IsEmpty())
     return;
 
@@ -141,7 +141,7 @@ MapWindow::DrawGLinkTraffic(Canvas &canvas,
   // Circle through the GliderLink targets
   for (auto it = traffic.list.begin(), end = traffic.list.end();
       it != end; ++it) {
-    const FlarmTraffic &traffic = *it;
+    const GliderLinkTraffic &traffic = *it;
 
     // Save the location of the target
     GeoPoint target_loc = traffic.location;
@@ -198,8 +198,7 @@ MapWindow::DrawGLinkTraffic(Canvas &canvas,
     }
 
     TrafficRenderer::Draw(canvas, traffic_look, traffic,
-                          traffic.track - projection.GetScreenAngle(),
-                          FlarmColor::NONE, sc);
+                          traffic.track - projection.GetScreenAngle(), sc);
   }
 }
 

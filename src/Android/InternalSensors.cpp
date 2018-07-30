@@ -291,16 +291,16 @@ Java_org_tophat_NonGPSSensors_setGliderLinkInfo(
 
   const char *nativeString = env->GetStringUTFChars(callsign, JNI_FALSE);
 
-  FlarmId id = FlarmId((uint32_t)gid);
+  GliderLinkId id = GliderLinkId((uint32_t)gid);
 
   StaticString<10> name;
   name.SetASCII(nativeString);
 
   env->ReleaseStringUTFChars(callsign, nativeString);
 
-  TrafficList *trafficList = &(basic.glink_data.traffic);
+  GliderLinkTrafficList *trafficList = &(basic.glink_data.traffic);
 
-  FlarmTraffic *traffic = trafficList->FindTraffic(id);
+  GliderLinkTraffic *traffic = trafficList->FindTraffic(id);
   if (traffic == nullptr) {
     traffic = trafficList->AllocateTraffic();
     if (traffic == nullptr)
@@ -314,7 +314,6 @@ Java_org_tophat_NonGPSSensors_setGliderLinkInfo(
   }
 
   traffic->name = name;
-  traffic->alarm_level = FlarmTraffic::AlarmType::NONE;
 
   traffic->location_available = true;
   traffic->location = GeoPoint(Angle::Degrees(longitude),
@@ -328,7 +327,6 @@ Java_org_tophat_NonGPSSensors_setGliderLinkInfo(
   traffic->climb_rate = fixed(vspeed);
   traffic->track_received = fixed(bearing) < fixed(361);
   traffic->track = Angle::Degrees(bearing);
-  traffic->type = FlarmTraffic::AircraftType::GLIDER;
 
   // set time of fix to current time
   traffic->valid.Update(basic.clock);
